@@ -2,15 +2,30 @@
 
 import { useState } from "react";
 
+interface rankItem {
+  name: string;
+}
+
+function getStoredLists(): rankItem[][] {
+  const data = localStorage.getItem('savedLists');
+  return data ? JSON.parse(data) : [];
+};
+
 export default function Home() {
 
-  const [itemList, setItemList] = useState<string[]>([]);
+  const [itemList, setItemList] = useState<rankItem[]>([]);
 
-  function addItem() {
-    setItemList(prevList => [...prevList, ""]);
+function saveList() {
+    const history = getStoredLists();
+    const updatedHistory = [...history, itemList];
+    localStorage.setItem('savedLists', JSON.stringify(updatedHistory));
   }
 
-  function setItem(index: number, newValue: string) {
+  function addItem() {
+    setItemList(prevList => [...prevList, {name: ""}]);
+  }
+
+  function setItem(index: number, newValue: rankItem) {
     setItemList(prevItems => {
         const newItems = [...prevItems];
         newItems[index] = newValue;
@@ -30,9 +45,9 @@ export default function Home() {
             <li key={index}>
                 <input 
                     type="text" 
-                    value={item} 
+                    value={item.name} 
                     placeholder="Type something..."
-                    onChange={(e) => setItem(index, e.target.value)} 
+                    onChange={(e) => setItem(index, {name: e.target.value})} 
                 />
                 <button onClick={(_) => deleteItem(index)}>Click me to delete item</button>
             </li>
@@ -40,7 +55,7 @@ export default function Home() {
       </ul>
       <button onClick={addItem}>Click me to add new item</button>
       <br></br>
-      <span>Total list: [{itemList.join(", ")}]</span>
+      <button onClick={saveList}>Click me to save locally</button>
     </div>
   );
 }
