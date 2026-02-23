@@ -1,20 +1,37 @@
 'use client';
 
 import { RankItem, RankItemList, getStoredLists } from "@/utils/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
-export default function Home() {
+export default function EditListPage() {
 
-  const [savedList, setSavedList] = useState<RankItemList>({id: 0, name: "", itemList: []});
+  const params = useParams();
 
-function saveList() {
+  const [savedList, setSavedList] = useState<RankItemList>({id: "0", name: "", itemList: []});
+
+  useEffect(() => {
+    const history = getStoredLists();
+    const listId = params.id;
+
+    if (listId !== "0") {
+      const existingList = history.find(l => l.id === listId);
+      if (existingList) {
+        setSavedList(existingList);
+      }
+    } else {
+      setSavedList(prev => ({ ...prev, id: crypto.randomUUID() }));
+    }
+  }, [params.id]);
+
+  function saveList() {
     const history = getStoredLists();
     const updatedHistory = [...history, savedList];
     localStorage.setItem('savedLists', JSON.stringify(updatedHistory));
   }
 
   function addItem() {
-    setSavedList(prevList => ({...savedList, itemList: [...savedList.itemList, {name: ""}]}));
+    setSavedList(prevList => ({...prevList, itemList: [...prevList.itemList, {name: ""}]}));
   }
 
   function setItemName(index: number, newName: string) {
@@ -27,7 +44,7 @@ function saveList() {
   }
 
   function deleteItem(index_to_remove: number) {
-    setSavedList(prevList => ({...savedList, itemList: prevList.itemList.filter((_, index) => index != index_to_remove)}));
+    setSavedList(prevList => ({...prevList, itemList: prevList.itemList.filter((_, index) => index != index_to_remove)}));
   }
 
   return (

@@ -10,12 +10,13 @@ export default function ListsPage() {
 
     useEffect(() => {
         setRankLists(getStoredLists());
+        console.log(rankLists);
     }, []);
 
     return (
     <div>
         <ul>
-        {rankLists.map((item, index) => (
+        {rankLists.map((item) => (
             <li key={item.id}>
                 <ListCard label={item.name}></ListCard>
             </li>

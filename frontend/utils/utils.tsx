@@ -1,7 +1,7 @@
 'use client';
 
 export interface RankItemList {
-  id: number;
+  id: string;
   name: string;
   itemList: RankItem[];
 }
