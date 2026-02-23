@@ -14,7 +14,7 @@ export default function EditListPage() {
     if (!params) { return; }
 
     const listId = params.id;
-    
+
     if (!listId || listId === "0") {
       setSavedList({ id: crypto.randomUUID(), name: "", elements: [] });
       return;
@@ -31,6 +31,10 @@ export default function EditListPage() {
 
   function saveList() {
     saveListById(savedList.id, savedList);
+  }
+
+  function setListName(newName: string) {
+    setSavedList(prevList => ({...prevList, name: newName}));
   }
 
   function addItem() {
@@ -53,6 +57,7 @@ export default function EditListPage() {
   return (
     <div>
       New List
+      <input type="text" placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
       <ul>
         {savedList.elements.map((item, index) => (
             <li key={index}>
