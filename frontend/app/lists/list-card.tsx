@@ -3,7 +3,7 @@
 import { ElementList } from "@/utils/utils";
 import Link from 'next/link';
 import { Button } from '@headlessui/react'
-import { PencilIcon, TrashIcon } from '@heroicons/react/16/solid';
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/16/solid';
 
 interface ListCardProps {
   listToDisplay: ElementList;
@@ -19,6 +19,11 @@ export default function ListCard({ listToDisplay, onDelete }: ListCardProps) {
         <Button className="rounded bg-blue-600 data-hover:bg-blue-700">
           <Link href={`/edit-list/${listToDisplay.id}`}>
             <PencilIcon className="size-8 text-white"/>
+          </Link>
+        </Button>
+        <Button className="rounded bg-green-600 data-hover:bg-green-700">
+          <Link href={`/rank/${listToDisplay.id}`}>
+            <PlusIcon className="size-8 text-white"/>
           </Link>
         </Button>
         <Button className="rounded bg-red-600 data-hover:bg-red-700 cursor-pointer" onClick={() => onDelete(listToDisplay)}>
