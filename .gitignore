@@ -1,5 +1,6 @@
 # Root / General
 .DS_Store
+**/.DS_Store
 *.pem
 .vscode/
 .idea
@@ -50,7 +51,6 @@ backend/.project
 backend/.settings
 backend/.springBeans
 backend/.sts4-cache
-HELP.md
 
 # Maintain specific build directories if required by Spring
 !**/src/main/**/target/
