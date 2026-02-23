@@ -51,86 +51,136 @@ export function deleteListById(id: string) {
 
 //RANKINGS
 
-export class RankNode {
-  private leftChild: RankNode | null;
-  private rightChild: RankNode | null;
-  private sortedList: Element[];
-  private isSorted: boolean;
+//make outer class that stores a queue of ranknodes
 
-  constructor(elementList: Element[]) {
+export interface RankNode {
+  leftChild: RankNode | null;
+  rightChild: RankNode | null;
+  sortedList: Element[];
+  isSorted: boolean;
+}
+
+export function newRankNode(elementList: Element[]): RankNode {
     if (elementList.length == 0) {
-      throw new Error("Cannot create a RankNode with an empty list.");
+      return {
+        leftChild: null,
+        rightChild: null,
+        sortedList: [],
+        isSorted: true
+      }
     }
     else if (elementList.length == 1) {
-      this.leftChild = null;
-      this.rightChild = null;
-      this.sortedList = [elementList[0]];
-      this.isSorted = true;
+      return {
+        leftChild: null,
+        rightChild: null,
+        sortedList: [elementList[0]],
+        isSorted: true
+      }
     }
     else {
       const halfLength = Math.floor(elementList.length / 2);
-      this.leftChild = new RankNode(elementList.slice(0, halfLength));
-      this.rightChild = new RankNode(elementList.slice(halfLength));
-      this.sortedList = [];
-      this.isSorted = false;
+      return {
+        leftChild: newRankNode(elementList.slice(0, halfLength)),
+        rightChild: newRankNode(elementList.slice(halfLength)),
+        sortedList: [],
+        isSorted: false
+      }
     }
+}
+
+function getNextPairLocation(node: RankNode): RankNode | null {
+  if (node.isSorted || !node.leftChild || !node.rightChild) {
+    return null;
   }
 
-  private nextPairLocation(): RankNode | null {
-    if (this.isSorted || !this.leftChild || !this.rightChild) {
-      return null;
-    }
-
-    if (!this.leftChild.isSorted) {
-      return this.leftChild.nextPairLocation();
-    }
-    else if (!this.rightChild.isSorted) {
-      return this.rightChild.nextPairLocation();
-    }
-    else {
-      return this;
-    }
+  if (!node.leftChild.isSorted) {
+    return getNextPairLocation(node.leftChild);
   }
+  else if (!node.rightChild.isSorted) {
+    return getNextPairLocation(node.rightChild);
+  }
+  else {
+    return node;
+  }
+}
 
-  public nextPair(): Element[] {
-    const nextPairLocation = this.nextPairLocation();
+export function getNextPair(node: RankNode): Element[] {
+    const nextPairLocation = getNextPairLocation(node);
 
     if (nextPairLocation == null || !nextPairLocation.leftChild || !nextPairLocation.rightChild) {
-      return [];
+      return [{name: ""}, {name: ""}];
     }
     
     return [nextPairLocation.leftChild.sortedList[0], nextPairLocation.rightChild.sortedList[0]];
+}
+
+export function sortNextPair(node: RankNode, preferLeft: boolean): RankNode | null {
+
+  if (node.isSorted || !node.leftChild || !node.rightChild) {
+    return null;
   }
 
-  public sortNextPair(preferLeft: boolean): boolean {
-    const nextPairLocation = this.nextPairLocation();
+  if (!node.leftChild.isSorted) {
+    return {
+      leftChild: sortNextPair(node.leftChild, preferLeft),
+      rightChild: node.rightChild,
+      sortedList: node.sortedList,
+      isSorted: node.isSorted
+    }
+  }
+  else if (!node.rightChild.isSorted) {
+    return {
+      leftChild: node.leftChild,
+      rightChild: sortNextPair(node.rightChild, preferLeft),
+      sortedList: node.sortedList,
+      isSorted: node.isSorted
+    }
+  }
 
-    if (nextPairLocation == null || !nextPairLocation.leftChild || !nextPairLocation.rightChild) {
-      return false;
+  if (preferLeft) {
+
+    var newSortedList = [...node.sortedList, node.leftChild.sortedList[0]];
+    const leftSortedList = node.leftChild.sortedList.slice(1);
+    var newIsSorted = false
+
+    if (node.leftChild.sortedList.length == 1) {
+      newSortedList = [...newSortedList, ...node.rightChild.sortedList];
+      newIsSorted = true
     }
 
-    const childList = preferLeft? nextPairLocation.leftChild.sortedList : nextPairLocation.rightChild.sortedList;
-    const preferredElement = childList.shift();
-
-    if (!preferredElement) {
-      return false;
+    return {
+      leftChild: {
+        leftChild: node.leftChild.leftChild,
+        rightChild: node.leftChild.rightChild,
+        sortedList: leftSortedList,
+        isSorted: true
+      },
+      rightChild: node.rightChild,
+      sortedList: newSortedList,
+      isSorted: newIsSorted
     }
 
-    if (childList.length == 0) {
+  } else {
+    var newSortedList = [...node.sortedList, node.rightChild.sortedList[0]];
+    const rightSortedList = node.rightChild.sortedList.slice(1);
+    var newIsSorted = false
 
-      nextPairLocation.sortedList.push(preferredElement);
-      const otherChildList = preferLeft? nextPairLocation.rightChild.sortedList : nextPairLocation.leftChild.sortedList;
-      nextPairLocation.sortedList.push(...otherChildList);
-      nextPairLocation.isSorted = true;
-
-    }
-    else {
-    
-      nextPairLocation.sortedList.push(preferredElement);
-
+    if (node.rightChild.sortedList.length == 1) {
+      newSortedList = [...newSortedList, ...node.leftChild.sortedList];
+      newIsSorted = true
     }
 
-    return true;
+    return {
+      leftChild: node.leftChild,
+      rightChild: {
+        leftChild: node.rightChild.leftChild,
+        rightChild: node.rightChild.rightChild,
+        sortedList: rightSortedList,
+        isSorted: true
+      },
+      sortedList: newSortedList,
+      isSorted: newIsSorted
+    }    
   }
 }
 
