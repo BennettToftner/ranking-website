@@ -2,11 +2,12 @@
 
 import { Element, ElementList, getStoredLists, getListById, saveListById } from "@/utils/utils";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function EditListPage() {
 
   const params = useParams();
+  const router = useRouter();
 
   const [savedList, setSavedList] = useState<ElementList>({id: "0", name: "", elements: []});
 
@@ -31,6 +32,7 @@ export default function EditListPage() {
 
   function saveList() {
     saveListById(savedList.id, savedList);
+    router.push("/lists");
   }
 
   function setListName(newName: string) {

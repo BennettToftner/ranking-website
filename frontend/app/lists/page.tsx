@@ -1,8 +1,9 @@
 'use client';
 
 import { deleteListById, Element, ElementList, getStoredLists } from "@/utils/utils";
-import { useState, useEffect } from "react";
 import ListCard from "./list-card";
+import { useState, useEffect } from "react";
+import Link from 'next/link';
 
 export default function ListsPage() {
 
@@ -19,7 +20,7 @@ export default function ListsPage() {
 
     return (
     <div>
-        <a href="/edit-list/0">New List</a>
+        <Link href="/edit-list/0">New List</Link>
         <ul>
         {rankLists.map((item) => (
             <li key={item.id}>
