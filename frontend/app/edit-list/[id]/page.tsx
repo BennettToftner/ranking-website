@@ -3,6 +3,7 @@
 import { Element, ElementList, getStoredLists, getListById, saveListById } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Navbar from "@/components/navbar";
 
 export default function EditListPage() {
 
@@ -58,7 +59,7 @@ export default function EditListPage() {
 
   return (
     <div>
-      New List
+      <Navbar></Navbar>
       <input type="text" value={savedList.name} placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
       <ul>
         {savedList.elements.map((item, index) => (

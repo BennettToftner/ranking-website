@@ -5,7 +5,7 @@ import { authClient } from "@/utils/auth-client"
 import ListCard from "./list-card";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState, useEffect } from "react";
-import Link from 'next/link';
+import Navbar from "@/components/navbar";
 
 export default function ListsPage() {
 
@@ -37,15 +37,13 @@ export default function ListsPage() {
 
     return (
     <div>
-        <div>
-            <Link href="/edit-list/0">New List</Link>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-                {rankLists.map((item) => (
-                    <div key={item.id}>
-                        <ListCard listToDisplay={item} onDelete={handleDelete}></ListCard>
-                    </div>
-                ))}
-            </div>
+        <Navbar></Navbar>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+            {rankLists.map((item) => (
+                <div key={item.id}>
+                    <ListCard listToDisplay={item} onDelete={handleDelete}></ListCard>
+                </div>
+            ))}
         </div>
         <Dialog open={deletingList !== null} onClose={() => setDeletingList(null)} className="relative z-50">
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
