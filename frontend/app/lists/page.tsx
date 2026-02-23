@@ -1,12 +1,12 @@
 'use client';
 
-import { RankItem, RankItemList, getStoredLists } from "@/utils/utils";
+import { Element, ElementList, getStoredLists } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import ListCard from "./list-card";
 
 export default function ListsPage() {
 
-    const [rankLists, setRankLists] = useState<RankItemList[]>([]);
+    const [rankLists, setRankLists] = useState<ElementList[]>([]);
 
     useEffect(() => {
         setRankLists(getStoredLists());

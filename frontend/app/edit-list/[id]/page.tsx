@@ -1,6 +1,6 @@
 'use client';
 
-import { RankItem, RankItemList, getStoredLists } from "@/utils/utils";
+import { Element, ElementList, getStoredLists, getListById, saveListById } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
@@ -8,50 +8,53 @@ export default function EditListPage() {
 
   const params = useParams();
 
-  const [savedList, setSavedList] = useState<RankItemList>({id: "0", name: "", itemList: []});
+  const [savedList, setSavedList] = useState<ElementList>({id: "0", name: "", elements: []});
 
   useEffect(() => {
-    const history = getStoredLists();
-    const listId = params.id;
+    if (!params) { return; }
 
-    if (listId !== "0") {
-      const existingList = history.find(l => l.id === listId);
-      if (existingList) {
-        setSavedList(existingList);
-      }
+    const listId = params.id;
+    
+    if (!listId || listId === "0") {
+      setSavedList({ id: crypto.randomUUID(), name: "", elements: [] });
+      return;
+    }
+
+    const elementList = getListById(listId.toString());
+    
+    if (elementList) {
+      setSavedList(elementList);
     } else {
-      setSavedList(prev => ({ ...prev, id: crypto.randomUUID() }));
+      setSavedList({ id: crypto.randomUUID(), name: "", elements: [] });
     }
   }, [params.id]);
 
   function saveList() {
-    const history = getStoredLists();
-    const updatedHistory = [...history, savedList];
-    localStorage.setItem('savedLists', JSON.stringify(updatedHistory));
+    saveListById(savedList.id, savedList);
   }
 
   function addItem() {
-    setSavedList(prevList => ({...prevList, itemList: [...prevList.itemList, {name: ""}]}));
+    setSavedList(prevList => ({...prevList, elements: [...prevList.elements, {name: ""}]}));
   }
 
   function setItemName(index: number, newName: string) {
     setSavedList(prevList => ({
       ...prevList,
-      itemList: prevList.itemList.map((item, i) => 
+      elements: prevList.elements.map((item, i) => 
         i === index ? { ...item, name: newName } : item
       )
     }));
   }
 
   function deleteItem(index_to_remove: number) {
-    setSavedList(prevList => ({...prevList, itemList: prevList.itemList.filter((_, index) => index != index_to_remove)}));
+    setSavedList(prevList => ({...prevList, elements: prevList.elements.filter((_, index) => index != index_to_remove)}));
   }
 
   return (
     <div>
       New List
       <ul>
-        {savedList.itemList.map((item, index) => (
+        {savedList.elements.map((item, index) => (
             <li key={index}>
                 <input 
                     type="text" 
