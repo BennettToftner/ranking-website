@@ -1,6 +1,6 @@
 'use client';
 
-import { Element, ElementList, getStoredLists } from "@/utils/utils";
+import { deleteListById, Element, ElementList, getStoredLists } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import ListCard from "./list-card";
 
@@ -10,8 +10,12 @@ export default function ListsPage() {
 
     useEffect(() => {
         setRankLists(getStoredLists());
-        console.log(rankLists);
     }, []);
+
+    function handleDelete(id:string) {
+        deleteListById(id);
+        setRankLists(prevList => prevList.filter(list => list.id != id));
+    }
 
     return (
     <div>
@@ -19,7 +23,7 @@ export default function ListsPage() {
         <ul>
         {rankLists.map((item) => (
             <li key={item.id}>
-                <ListCard label={item.name} listId={item.id}></ListCard>
+                <ListCard label={item.name} listId={item.id} onDelete={handleDelete}></ListCard>
             </li>
         ))}
         </ul>

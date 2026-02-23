@@ -37,3 +37,10 @@ export function saveListById(id: string, list: ElementList) {
   const mapArray = Array.from(listMap.entries());
   localStorage.setItem('savedLists', JSON.stringify(mapArray));
 }
+
+export function deleteListById(id: string) {
+  const listMap = getListMap();
+  listMap.delete(id);
+  const mapArray = Array.from(listMap.entries());
+  localStorage.setItem('savedLists', JSON.stringify(mapArray));
+}
