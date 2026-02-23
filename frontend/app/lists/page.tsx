@@ -31,14 +31,16 @@ export default function ListsPage() {
 
     return (
     <div>
-        <Link href="/edit-list/0">New List</Link>
-        <ul>
-        {rankLists.map((item) => (
-            <li key={item.id}>
-                <ListCard listToDisplay={item} onDelete={handleDelete}></ListCard>
-            </li>
-        ))}
-        </ul>
+        <div>
+            <Link href="/edit-list/0">New List</Link>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+                {rankLists.map((item) => (
+                    <div key={item.id}>
+                        <ListCard listToDisplay={item} onDelete={handleDelete}></ListCard>
+                    </div>
+                ))}
+            </div>
+        </div>
         <Dialog open={deletingList !== null} onClose={() => setDeletingList(null)} className="relative z-50">
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <DialogPanel className="max-w-lg space-y-4 border bg-white p-12">
