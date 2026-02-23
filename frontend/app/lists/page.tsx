@@ -15,10 +15,11 @@ export default function ListsPage() {
 
     return (
     <div>
+        <a href="/edit-list/0">New List</a>
         <ul>
         {rankLists.map((item) => (
             <li key={item.id}>
-                <ListCard label={item.name}></ListCard>
+                <ListCard label={item.name} listId={item.id}></ListCard>
             </li>
         ))}
         </ul>
