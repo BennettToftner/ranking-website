@@ -1,6 +1,7 @@
 'use client';
 
 import { deleteListById, ElementList, getStoredLists } from "@/utils/utils";
+import { authClient } from "@/utils/auth-client"
 import ListCard from "./list-card";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState, useEffect } from "react";
@@ -8,10 +9,15 @@ import Link from 'next/link';
 
 export default function ListsPage() {
 
+    const { data: session } = authClient.useSession()
+
     const [rankLists, setRankLists] = useState<ElementList[]>([]);
     const [deletingList, setDeletingList] = useState<ElementList | null>(null);
 
     useEffect(() => {
+        if (session) {
+            console.log(session.user.id);
+        }
         setRankLists(getStoredLists());
     }, []);
 
