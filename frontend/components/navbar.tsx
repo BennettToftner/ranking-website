@@ -9,7 +9,8 @@ export default function Navbar() {
                 Home
             </Link>
             <div className="flex gap-6 font-medium">
-                <Link className="" href='/lists'>My Lists</Link>
+                <Link href='/rankings'>My Rankings</Link>
+                <Link href='/lists'>My Lists</Link>
                 <Link href='/edit-list/0'>New List</Link>
                 <Link href='/profile'>Profile</Link>
             </div>
