@@ -59,7 +59,7 @@ export default function EditListPage() {
   return (
     <div>
       New List
-      <input type="text" placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
+      <input type="text" value={savedList.name} placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
       <ul>
         {savedList.elements.map((item, index) => (
             <li key={index}>
