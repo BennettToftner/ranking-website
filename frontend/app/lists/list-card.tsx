@@ -22,7 +22,7 @@ export default function ListCard({ listToDisplay, onDelete }: ListCardProps) {
           </Link>
         </Button>
         <Button className="rounded bg-green-600 data-hover:bg-green-700">
-          <Link href={`/rank/${listToDisplay.id}`}>
+          <Link href={`/rank/${listToDisplay.id}/0`}>
             <PlusIcon className="size-8 text-white"/>
           </Link>
         </Button>

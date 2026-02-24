@@ -187,4 +187,40 @@ export function sortNextPair(node: RankNode, preferLeft: boolean): RankNode | nu
 export interface Ranking {
   id: string;
   name: string;
+  rankNode: RankNode
+}
+
+function getRankingMap(): Map<string, Ranking> {
+  const data = localStorage.getItem('savedRankings');
+  if (!data) {
+    return new Map();
+  }
+  const parsed: [string, Ranking][] = JSON.parse(data);
+  return new Map(parsed);
+}
+
+export function getStoredRankings(): Ranking[] {
+  const listMap = getRankingMap();
+  const rankings = [...listMap.values()];
+  return rankings;
+};
+
+export function getRankingById(id: string): Ranking | undefined {
+  const rankingMap = getRankingMap();
+  const ranking = rankingMap.get(id);
+  return ranking;
+}
+
+export function saveRankingById(id: string, ranking: Ranking) {
+  const rankingMap = getRankingMap();
+  rankingMap.set(id, ranking);
+  const mapArray = Array.from(rankingMap.entries());
+  localStorage.setItem('savedRankings', JSON.stringify(mapArray));
+}
+
+export function deleteRankingById(id: string) {
+  const rankingMap = getRankingMap();
+  rankingMap.delete(id);
+  const mapArray = Array.from(rankingMap.entries());
+  localStorage.setItem('savedRankings', JSON.stringify(mapArray));
 }
