@@ -12,6 +12,7 @@ export default function RankListPage() {
 
 
   const [listNotFound, setListNotFound] = useState<boolean>(false);
+  const [rankingFinished, setRankingFinished] = useState<boolean>(false);
 
   const [ranking, setRanking] = useState<Ranking>({id: "0", name: "", rankNode: newRankNode([])});
   const [currentPair, setCurrentPair] = useState<Element[]>([{name: ""}, {name: ""}]);
@@ -48,11 +49,12 @@ export default function RankListPage() {
 
   useEffect(() => {
     if (ranking.rankNode.isSorted) {
-        console.log(ranking.rankNode.sortedList);
-        //actually show the list on the page
+        console.log("finished!");
+        setRankingFinished(true);
     }
     else {
         setCurrentPair(getNextPair(ranking.rankNode));
+        setRankingFinished(false);
     }
   }, [ranking])
 
@@ -77,13 +79,21 @@ export default function RankListPage() {
         <div>
           <h1 className="text-red-500 text-xl">Couldn't find a list with that ID.</h1>
         </div>}
-      {!listNotFound &&
+      {!listNotFound && !rankingFinished &&
         <div>
           <button onClick={() => makeDecision(true)}>{currentPair[0].name}</button>
           <br></br>
           <button onClick={() => makeDecision(false)}>{currentPair[1].name}</button>
           <br></br>
           <button onClick={saveRanking}>Click me to save ranking locally</button>
+        </div>}
+      {rankingFinished &&
+        <div>
+          {ranking.rankNode.sortedList.map((item, index) => (
+            <li key={index}>
+                {item.name}
+            </li>
+          ))}
         </div>}
     </div>
   );
