@@ -62,25 +62,72 @@ export async function POST(
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
+  const client = await pool.connect();
+
   try {
-    const text = `INSERT INTO list (id, name, owner_id, privacy)
-                  VALUES ($1, $2, $3, $4)
-                  ON CONFLICT (id)
-                  DO UPDATE SET
-                  name = EXCLUDED.name,
-                  privacy = EXCLUDED.privacy`;
-    const values = [listId, name, session.data?.user.id, "private"];
+
+    await client.query('BEGIN');
+
+    const insertListQuery = `INSERT INTO list (id, name, owner_id, privacy)
+                             VALUES ($1, $2, $3, $4)
+                             ON CONFLICT (id)
+                             DO UPDATE SET
+                             name = EXCLUDED.name,
+                             privacy = EXCLUDED.privacy`;
+    const insertListValues = [listId, name, session.data?.user.id, "private"];
     console.log(`i'm trying to access database`)
-    const res = await pool.query(text, values);
-    console.log(`the response was ${res}`)
+    const insertListRes = await client.query(insertListQuery, insertListValues);
+    console.log(`the response was ${insertListRes}`)
+
+    const deleteElementQuery = `DELETE FROM element
+                                WHERE list_id = $1`;
+    const deleteElementValues = [listId];
+    const deleteElementRes = await client.query(deleteElementQuery, deleteElementValues);
+    
 
     for (let element of elements) {
-      //insert each element into list
+      const insertElementQuery = `INSERT INTO element (list_id, name, index)
+                                  VALUES ($1, $2, $3)`;
+      const insertElementValues = [listId, element.name, element.index]
+      const insertElementRed = await client.query(insertElementQuery, insertElementValues);
     }
 
-    return NextResponse.json(res.rows);
-  } catch (error) {
-    console.log(`Database error: ${error}`)
+    await client.query('COMMIT');
+    return NextResponse.json({ success: true });
+
+  } catch (error: any) {
+    await client.query('ROLLBACK');
+    console.error(`Database error: ${error.message}`);
+    return NextResponse.json({ error: "Database Error:" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: listId } = await params;
+
+  console.log(`list id is ${listId}`)
+
+  const session = await authClient.getSession({
+    fetchOptions: {
+      headers: await headers() 
+    }
+  });
+
+  if (!session.data) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const deleteListQuery = `DELETE FROM list
+                             WHERE id = $1`;
+    const deleteListValues = [listId];
+    const insertListRes = await pool.query(deleteListQuery, deleteListValues);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error(`Database error: ${error.message}`);
     return NextResponse.json({ error: "Database Error:" }, { status: 500 });
   }
 }

@@ -58,7 +58,7 @@ export default function EditListPage() {
   }
 
   function addItem() {
-    setSavedList(prevList => ({...prevList, elements: [...prevList.elements, {name: ""}]}));
+    setSavedList(prevList => ({...prevList, elements: [...prevList.elements, {index: prevList.elements[prevList.elements.length].index + 1, name: ""}]}));
   }
 
   function setItemName(index: number, newName: string) {
@@ -72,6 +72,7 @@ export default function EditListPage() {
 
   function deleteItem(index_to_remove: number) {
     setSavedList(prevList => ({...prevList, elements: prevList.elements.filter((_, index) => index != index_to_remove)}));
+    //get lists from database as well
   }
 
   return (

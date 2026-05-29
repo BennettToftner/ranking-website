@@ -11,6 +11,7 @@ export interface ElementList {
 }
 
 export interface Element {
+  index: number;
   name: string;
 }
 
@@ -108,7 +109,7 @@ export function getNextPair(node: RankNode): Element[] {
     const nextPairLocation = getNextPairLocation(node);
 
     if (nextPairLocation == null || !nextPairLocation.leftChild || !nextPairLocation.rightChild) {
-      return [{name: ""}, {name: ""}];
+      return [{index: 0, name: ""}, {index: 1, name: ""}];
     }
     
     return [nextPairLocation.leftChild.sortedList[0], nextPairLocation.rightChild.sortedList[0]];
