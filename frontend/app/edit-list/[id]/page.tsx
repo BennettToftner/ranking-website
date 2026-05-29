@@ -31,8 +31,25 @@ export default function EditListPage() {
     }
   }, [params.id]);
 
-  function saveList() {
+  function saveListLocal() {
     saveListById(savedList.id, savedList);
+    router.push("/lists");
+  }
+
+  async function saveListDb() {
+    const response = await fetch(`/api/list/${savedList.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    return data;
     router.push("/lists");
   }
 
@@ -76,7 +93,9 @@ export default function EditListPage() {
       </ul>
       <button onClick={addItem}>Click me to add new item</button>
       <br></br>
-      <button onClick={saveList}>Click me to save locally</button>
+      <button onClick={saveListLocal}>Click me to save locally</button>
+      <br></br>
+      <button onClick={saveListDb}>Click me to save to database</button>
     </div>
   );
 }
