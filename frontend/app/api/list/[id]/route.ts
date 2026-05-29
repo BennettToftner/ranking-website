@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { authClient } from "@/utils/auth-client";
 import { NextResponse } from "next/server";
 import { pool } from "@/utils/database"
+import { Element } from "@/utils/utils"
 
 export async function GET(
   request: Request,
@@ -20,7 +21,7 @@ export async function GET(
     const values = [listId, session.data?.user.id];
     const res = await pool.query(text, values);
 
-    return NextResponse.json(res.rows);
+    return NextResponse.json(res.rows[0]);
   } catch (error) {
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
@@ -46,12 +47,36 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  var name = 'Untitled List'
+  var elements: Element[] = []
+
   try {
-    const text = "INSERT INTO list (id, name, owner_id, privacy) VALUES ($1, $2, $3, $4)";
-    const values = [listId, "test name", session.data?.user.id, "private"];
+    const body = await request.json();
+
+    name = body.name ?? name;
+    elements = body.elements ?? elements;
+    console.log(name)
+    console.log(elements)
+    
+  } catch (error) {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
+    const text = `INSERT INTO list (id, name, owner_id, privacy)
+                  VALUES ($1, $2, $3, $4)
+                  ON CONFLICT (id)
+                  DO UPDATE SET
+                  name = EXCLUDED.name,
+                  privacy = EXCLUDED.privacy`;
+    const values = [listId, name, session.data?.user.id, "private"];
     console.log(`i'm trying to access database`)
     const res = await pool.query(text, values);
     console.log(`the response was ${res}`)
+
+    for (let element of elements) {
+      //insert each element into list
+    }
 
     return NextResponse.json(res.rows);
   } catch (error) {

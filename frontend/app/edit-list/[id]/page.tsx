@@ -42,6 +42,7 @@ export default function EditListPage() {
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({name: savedList.name, elements: savedList.elements})
     });
 
     if (!response.ok) {
@@ -49,7 +50,6 @@ export default function EditListPage() {
     }
 
     const data = await response.json();
-    return data;
     router.push("/lists");
   }
 
