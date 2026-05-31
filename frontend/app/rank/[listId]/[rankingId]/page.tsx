@@ -15,7 +15,7 @@ export default function RankListPage() {
   const [rankingFinished, setRankingFinished] = useState<boolean>(false);
 
   const [ranking, setRanking] = useState<Ranking>({id: "0", name: "", rankNode: newRankNode([])});
-  const [currentPair, setCurrentPair] = useState<Element[]>([{name: ""}, {name: ""}]);
+  const [currentPair, setCurrentPair] = useState<Element[]>([{index: 0, name: ""}, {index: 1, name: ""}]);
 
   useEffect(() => {
     if (!params) { return; }
