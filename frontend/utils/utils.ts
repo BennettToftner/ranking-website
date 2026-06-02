@@ -4,6 +4,15 @@ import next from "next";
 
 //LISTS
 
+export interface ListInfo {
+    id: string;
+    name: string;
+    owner_id: string;
+    privacy: 'public' | 'private';
+    created_at: Date; 
+    updated_at: Date;
+}
+
 export interface ElementList {
   id: string;
   name: string;
@@ -11,7 +20,7 @@ export interface ElementList {
 }
 
 export interface Element {
-  index: number;
+  id: string;
   name: string;
 }
 
@@ -24,11 +33,15 @@ function getListMap(): Map<string, ElementList> {
   return new Map(parsed);
 }
 
-export function getStoredLists(): ElementList[] {
+export function getLocalLists(): ElementList[] {
   const listMap = getListMap();
   const elementLists = [...listMap.values()];
   return elementLists;
 };
+
+export function getDatabaseLists(): ElementList[] {
+  return [];
+}
 
 export function getListById(id: string): ElementList | undefined {
   const listMap = getListMap();
@@ -109,7 +122,7 @@ export function getNextPair(node: RankNode): Element[] {
     const nextPairLocation = getNextPairLocation(node);
 
     if (nextPairLocation == null || !nextPairLocation.leftChild || !nextPairLocation.rightChild) {
-      return [{index: 0, name: ""}, {index: 1, name: ""}];
+      return [{id: "", name: ""}, {id: "", name: ""}];
     }
     
     return [nextPairLocation.leftChild.sortedList[0], nextPairLocation.rightChild.sortedList[0]];

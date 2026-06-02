@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteListById, ElementList, getStoredLists } from "@/utils/utils";
+import { deleteListById, ElementList, getLocalLists, ListInfo } from "@/utils/utils";
 import { authClient } from "@/utils/auth-client"
 import ListCard from "./list-card";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -11,17 +11,54 @@ export default function ListsPage() {
 
     const { data: session } = authClient.useSession()
 
-    const [rankLists, setRankLists] = useState<ElementList[]>([]);
-    const [deletingList, setDeletingList] = useState<ElementList | null>(null);
+    const [rankLists, setRankLists] = useState<ListInfo[]>([]);
+    const [deletingList, setDeletingList] = useState<ListInfo | null>(null);
+
+    async function getDbLists(): Promise<ListInfo[]> {
+        const session = await authClient.getSession();
+
+        if (!session) {
+            return [];
+        }
+
+        const userId = session.data?.user.id;
+
+        try {
+            const response = await fetch(`/api/list/user/${userId}`, {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch lists");
+                return [];
+            }
+
+            const data = await response.json() as ListInfo[];
+            
+            return data;
+        } catch(error) {
+            console.error("Error fetching lists:", error);
+            return [];
+        }
+
+    }
 
     useEffect(() => {
+        const fetchLists = async () => {
+            const data = await getDbLists();
+            setRankLists(data);
+        };
+
         if (session) {
             console.log(session.user.id);
+            fetchLists();
         }
-        setRankLists(getStoredLists());
-    }, []);
+    }, [session]);
 
-    function handleDelete(listToDelete: ElementList) {
+    function handleDelete(listToDelete: ListInfo) {
         setDeletingList(listToDelete);
     }
 

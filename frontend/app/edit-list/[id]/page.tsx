@@ -1,6 +1,6 @@
 'use client';
 
-import { Element, ElementList, getStoredLists, getListById, saveListById } from "@/utils/utils";
+import { Element, ElementList, getListById, saveListById } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
@@ -58,7 +58,7 @@ export default function EditListPage() {
   }
 
   function addItem() {
-    setSavedList(prevList => ({...prevList, elements: [...prevList.elements, {index: prevList.elements[prevList.elements.length].index + 1, name: ""}]}));
+    setSavedList(prevList => ({...prevList, elements:[...prevList.elements, { id: crypto.randomUUID(), name: "" }]}));
   }
 
   function setItemName(index: number, newName: string) {

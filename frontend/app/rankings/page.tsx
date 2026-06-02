@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteListById, ElementList, getStoredLists } from "@/utils/utils";
+import { deleteListById, ElementList, getLocalLists } from "@/utils/utils";
 import { authClient } from "@/utils/auth-client";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState, useEffect } from "react";
@@ -17,7 +17,7 @@ export default function ListsPage() {
         if (session) {
             console.log(session.user.id);
         }
-        setRankLists(getStoredLists());
+        setRankLists(getLocalLists());
     }, []);
 
     function handleDelete(listToDelete: ElementList) {

@@ -1,13 +1,13 @@
 'use client';
 
-import { ElementList } from "@/utils/utils";
+import { ElementList, ListInfo } from "@/utils/utils";
 import Link from 'next/link';
 import { Button } from '@headlessui/react'
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/16/solid';
 
 interface ListCardProps {
-  listToDisplay: ElementList;
-  onDelete: (listToDelete: ElementList) => void;
+  listToDisplay: ListInfo;
+  onDelete: (listToDelete: ListInfo) => void;
 }
 
 export default function ListCard({ listToDisplay, onDelete }: ListCardProps) {

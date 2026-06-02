@@ -86,9 +86,9 @@ export async function POST(
     
 
     for (let element of elements) {
-      const insertElementQuery = `INSERT INTO element (list_id, name, index)
+      const insertElementQuery = `INSERT INTO element (list_id, name, id)
                                   VALUES ($1, $2, $3)`;
-      const insertElementValues = [listId, element.name, element.index]
+      const insertElementValues = [listId, element.name, element.id]
       const insertElementRed = await client.query(insertElementQuery, insertElementValues);
     }
 
