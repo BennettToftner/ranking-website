@@ -10,8 +10,6 @@ export async function GET(
 ) {
   const { id: requestedUserId } = await params;
 
-  console.log('Received request');
-
   const session = await authClient.getSession({
     fetchOptions: {
       headers: await headers() 
@@ -28,14 +26,9 @@ export async function GET(
     text = `SELECT * FROM list WHERE owner_id = $1`
   }
 
-  console.log(`User ${userId} requested to see lists of user ${requestedUserId}`)
-  console.log(`Query is: ${text}`);
-
   try {
     const values = [requestedUserId];
-    console.log(`Attempting to access database`);
     const res = await pool.query<ListInfo>(text, values);
-    console.log(`Accessed`);
 
     if (res.rowCount != null && res.rowCount > 0) {
           return NextResponse.json(res.rows);
