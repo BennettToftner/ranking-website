@@ -43,6 +43,28 @@ export default function ListsPage() {
         }
     }, [session]);
 
+    async function deleteListDb(listId: string): Promise<boolean> {
+        try {
+            const response = await fetch(`/api/list/${listId}`, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                console.error("Failed to delete list");
+                return false;
+            }
+
+            return true;
+
+        } catch(error) {
+            console.error("Error deleting list:", error);
+            return false;
+        }
+    }
+
     function handleDelete(listToDelete: ListInfo) {
         setDeletingList(listToDelete);
     }
@@ -52,7 +74,7 @@ export default function ListsPage() {
             return;
         }
 
-        deleteListById(deletingList.id);
+        deleteListDb(deletingList.id);
         setRankLists(prevList => prevList.filter(list => list.id != deletingList.id));
         setDeletingList(null);
     }

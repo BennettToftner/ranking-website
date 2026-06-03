@@ -58,14 +58,16 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  var name = 'Untitled List'
-  var elements: Element[] = []
+  var name = 'Untitled List';
+  var elements: Element[] = [];
+  var privacy = "private";
 
   try {
     const body = await request.json();
 
     name = body.name ?? name;
     elements = body.elements ?? elements;
+    privacy = body.privacy ?? privacy;
     
   } catch (error) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
@@ -82,8 +84,9 @@ export async function POST(
                              ON CONFLICT (id)
                              DO UPDATE SET
                              name = EXCLUDED.name,
-                             privacy = EXCLUDED.privacy`;
-    const insertListValues = [listId, name, session.data?.user.id, "private"];
+                             privacy = EXCLUDED.privacy
+                             WHERE list.owner_id = $3`;
+    const insertListValues = [listId, name, session.data?.user.id, privacy];
     const insertListRes = await client.query(insertListQuery, insertListValues);
 
     const deleteElementQuery = `DELETE FROM element
@@ -130,10 +133,17 @@ export async function DELETE(
   }
 
   try {
+
     const deleteListQuery = `DELETE FROM list
-                             WHERE id = $1`;
-    const deleteListValues = [listId];
+                             WHERE owner_id = $1
+                             AND id = $2`;
+    const deleteListValues = [session.data?.user.id, listId];
     const insertListRes = await pool.query(deleteListQuery, deleteListValues);
+
+    if (insertListRes.rowCount == 0) {
+      return NextResponse.json({ status: 404 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error(`Database error: ${error.message}`);
