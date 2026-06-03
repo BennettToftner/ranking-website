@@ -53,12 +53,12 @@ export default function EditListPage() {
 
     if (!listId || listId === "0") {
       setSavedList({ id: crypto.randomUUID(), name: "", owner_id: userId, privacy: "private",  created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: [] });
+      setListFound(true);
       setPageLoaded(true);
       return;
     }
 
     getDbList(listId).then(result => {
-      console.log(result);
       setPageLoaded(true);
       if (result != "NOT_FOUND") {
         setSavedList(result);
