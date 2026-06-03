@@ -11,12 +11,7 @@ export interface ListInfo {
     privacy: 'public' | 'private';
     created_at: Date; 
     updated_at: Date;
-}
-
-export interface ElementList {
-  id: string;
-  name: string;
-  elements: Element[];
+    elements: Element[];
 }
 
 export interface Element {
@@ -24,32 +19,28 @@ export interface Element {
   name: string;
 }
 
-function getListMap(): Map<string, ElementList> {
+function getListMap(): Map<string, ListInfo> {
   const data = localStorage.getItem('savedLists');
   if (!data) {
     return new Map();
   }
-  const parsed: [string, ElementList][] = JSON.parse(data);
+  const parsed: [string, ListInfo][] = JSON.parse(data);
   return new Map(parsed);
 }
 
-export function getLocalLists(): ElementList[] {
+export function getLocalLists(): ListInfo[] {
   const listMap = getListMap();
   const elementLists = [...listMap.values()];
   return elementLists;
 };
 
-export function getDatabaseLists(): ElementList[] {
-  return [];
-}
-
-export function getListById(id: string): ElementList | undefined {
+export function getListById(id: string): ListInfo | undefined {
   const listMap = getListMap();
   const rankItemList = listMap.get(id);
   return rankItemList;
 }
 
-export function saveListById(id: string, list: ElementList) {
+export function saveListById(id: string, list: ListInfo) {
   const listMap = getListMap();
   listMap.set(id, list);
   const mapArray = Array.from(listMap.entries());

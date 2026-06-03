@@ -1,40 +1,71 @@
 'use client';
 
-import { Element, ElementList, getListById, saveListById } from "@/utils/utils";
+import { Element, ListInfo } from "@/utils/utils";
+import { authClient } from "@/utils/auth-client"
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
 
 export default function EditListPage() {
 
+  const { data: session } = authClient.useSession()
   const params = useParams();
   const router = useRouter();
 
-  const [savedList, setSavedList] = useState<ElementList>({id: "0", name: "", elements: []});
+  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
+  const [listFound, setListFound] = useState<boolean>(false);
+  const [savedList, setSavedList] = useState<ListInfo>({id: "0", name: "", owner_id: "0", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: []});
+
+  type FetchResult = ListInfo | "NOT_FOUND";
+
+  async function getDbList(listId: string): Promise<FetchResult> {
+    try {
+      const response = await fetch(`/api/list/${listId}`, {
+          method: 'GET',
+          headers: {
+          'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          console.error("Failed to fetch lists");
+          return "NOT_FOUND";
+      }
+
+      const data = await response.json() as ListInfo;
+      
+      return data;
+    } catch(error) {
+        console.error("Error fetching lists:", error);
+        return "NOT_FOUND";
+    }
+  }
 
   useEffect(() => {
     if (!params) { return; }
 
-    const listId = params.id;
+    var userId = "";
+    if (session?.user?.id) {
+      userId = session.user.id;
+    }
+
+    const listId = params.id as string;
 
     if (!listId || listId === "0") {
-      setSavedList({ id: crypto.randomUUID(), name: "", elements: [] });
+      setSavedList({ id: crypto.randomUUID(), name: "", owner_id: userId, privacy: "private",  created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: [] });
+      setPageLoaded(true);
       return;
     }
 
-    const elementList = getListById(listId.toString());
-    
-    if (elementList) {
-      setSavedList(elementList);
-    } else {
-      setSavedList({ id: crypto.randomUUID(), name: "", elements: [] });
-    }
-  }, [params.id]);
-
-  function saveListLocal() {
-    saveListById(savedList.id, savedList);
-    router.push("/lists");
-  }
+    getDbList(listId).then(result => {
+      console.log(result);
+      setPageLoaded(true);
+      if (result != "NOT_FOUND") {
+        setSavedList(result);
+        setListFound(true);
+      }
+    });
+  }, [params.id, session]);
 
   async function saveListDb() {
     const response = await fetch(`/api/list/${savedList.id}`, {
@@ -75,28 +106,42 @@ export default function EditListPage() {
     //get lists from database as well
   }
 
-  return (
-    <div>
-      <Navbar></Navbar>
-      <input type="text" value={savedList.name} placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
-      <ul>
-        {savedList.elements.map((item, index) => (
-            <li key={index}>
-                <input 
-                    type="text" 
-                    value={item.name} 
-                    placeholder="Type something..."
-                    onChange={(e) => setItemName(index, e.target.value)} 
-                />
-                <button onClick={(_) => deleteItem(index)}>Click me to delete item</button>
-            </li>
-        ))}
-      </ul>
-      <button onClick={addItem}>Click me to add new item</button>
-      <br></br>
-      <button onClick={saveListLocal}>Click me to save locally</button>
-      <br></br>
-      <button onClick={saveListDb}>Click me to save to database</button>
-    </div>
-  );
+  if (!pageLoaded) {
+    return (
+      <div>
+        <Navbar></Navbar>
+        Loading...
+      </div>
+    )
+  } else if (!listFound) {
+    return (
+      <div>
+        <Navbar></Navbar>
+        There was an error retrieving the requested list. You may not have permission to access the list, or it simply does not exist.
+      </div>
+    )
+  } else {
+    return (
+      <div>
+        <Navbar></Navbar>
+        <input type="text" value={savedList.name} placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
+        <ul>
+          {savedList.elements.map((item, index) => (
+              <li key={index}>
+                  <input 
+                      type="text" 
+                      value={item.name} 
+                      placeholder="Type something..."
+                      onChange={(e) => setItemName(index, e.target.value)} 
+                  />
+                  <button onClick={(_) => deleteItem(index)}>Click me to delete item</button>
+              </li>
+          ))}
+        </ul>
+        <button onClick={addItem}>Click me to add new item</button>
+        <br></br>
+        <button onClick={saveListDb}>Click me to save to database</button>
+      </div>
+    );
+  }
 }

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { authClient } from "@/utils/auth-client";
 import { NextResponse } from "next/server";
 import { pool } from "@/utils/database"
-import { Element } from "@/utils/utils"
+import { Element, ListInfo } from "@/utils/utils"
 
 export async function GET(
   request: Request,
@@ -10,18 +10,33 @@ export async function GET(
 ) {
   const { id: listId } = await params;
 
-  const session = await authClient.getSession();
+  const session = await authClient.getSession({
+    fetchOptions: {
+      headers: await headers() 
+    }
+  });
 
-  if (!session) {
+  const userId = session?.data?.user?.id;
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const text = 'SELECT * FROM list WHERE list.id = $1 AND ownerId = $2';
-    const values = [listId, session.data?.user.id];
-    const res = await pool.query(text, values);
 
-    return NextResponse.json(res.rows[0]);
+    const listQuery = `SELECT l.*, COALESCE(json_agg(json_build_object('id', e.id, 'name', e.name)), '[]') as elements
+                       FROM list l
+                       LEFT JOIN element e ON l.id = e.list_id
+                       WHERE l.id = $1
+                       AND (l.privacy = 'public' OR l.owner_id = $2)
+                       GROUP BY l.id`;
+    const listValues = [listId, userId];
+    const listRes = await pool.query<ListInfo>(listQuery, listValues);
+
+    if (listRes.rowCount == 0) {
+      return NextResponse.json({ error: "List not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(listRes.rows[0]);
   } catch (error) {
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
@@ -33,15 +48,11 @@ export async function POST(
 ) {
   const { id: listId } = await params;
 
-  console.log(`list id is ${listId}`)
-
   const session = await authClient.getSession({
     fetchOptions: {
       headers: await headers() 
     }
   });
-
-  console.log(`I got ${session.data?.user?.id}`)
 
   if (!session.data) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -55,8 +66,6 @@ export async function POST(
 
     name = body.name ?? name;
     elements = body.elements ?? elements;
-    console.log(name)
-    console.log(elements)
     
   } catch (error) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
@@ -75,9 +84,7 @@ export async function POST(
                              name = EXCLUDED.name,
                              privacy = EXCLUDED.privacy`;
     const insertListValues = [listId, name, session.data?.user.id, "private"];
-    console.log(`i'm trying to access database`)
     const insertListRes = await client.query(insertListQuery, insertListValues);
-    console.log(`the response was ${insertListRes}`)
 
     const deleteElementQuery = `DELETE FROM element
                                 WHERE list_id = $1`;
@@ -99,6 +106,8 @@ export async function POST(
     await client.query('ROLLBACK');
     console.error(`Database error: ${error.message}`);
     return NextResponse.json({ error: "Database Error:" }, { status: 500 });
+  } finally {
+    client.release();
   }
 }
 

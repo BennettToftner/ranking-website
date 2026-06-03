@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteListById, ElementList, getLocalLists } from "@/utils/utils";
+import { deleteListById, getLocalLists, ListInfo } from "@/utils/utils";
 import { authClient } from "@/utils/auth-client";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState, useEffect } from "react";
@@ -10,8 +10,8 @@ export default function ListsPage() {
 
     const { data: session } = authClient.useSession()
 
-    const [rankLists, setRankLists] = useState<ElementList[]>([]);
-    const [deletingList, setDeletingList] = useState<ElementList | null>(null);
+    const [rankLists, setRankLists] = useState<ListInfo[]>([]);
+    const [deletingList, setDeletingList] = useState<ListInfo | null>(null);
 
     useEffect(() => {
         if (session) {
@@ -20,7 +20,7 @@ export default function ListsPage() {
         setRankLists(getLocalLists());
     }, []);
 
-    function handleDelete(listToDelete: ElementList) {
+    function handleDelete(listToDelete: ListInfo) {
         setDeletingList(listToDelete);
     }
 

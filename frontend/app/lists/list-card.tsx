@@ -1,6 +1,6 @@
 'use client';
 
-import { ElementList, ListInfo } from "@/utils/utils";
+import { ListInfo } from "@/utils/utils";
 import Link from 'next/link';
 import { Button } from '@headlessui/react'
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/16/solid';

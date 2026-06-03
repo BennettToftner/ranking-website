@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteListById, ElementList, getLocalLists, ListInfo } from "@/utils/utils";
+import { deleteListById, getLocalLists, ListInfo } from "@/utils/utils";
 import { authClient } from "@/utils/auth-client"
 import ListCard from "./list-card";
 import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -14,15 +14,7 @@ export default function ListsPage() {
     const [rankLists, setRankLists] = useState<ListInfo[]>([]);
     const [deletingList, setDeletingList] = useState<ListInfo | null>(null);
 
-    async function getDbLists(): Promise<ListInfo[]> {
-        const session = await authClient.getSession();
-
-        if (!session) {
-            return [];
-        }
-
-        const userId = session.data?.user.id;
-
+    async function getDbLists(userId: string): Promise<ListInfo[]> {
         try {
             const response = await fetch(`/api/list/user/${userId}`, {
                 method: 'GET',
@@ -43,18 +35,11 @@ export default function ListsPage() {
             console.error("Error fetching lists:", error);
             return [];
         }
-
     }
 
     useEffect(() => {
-        const fetchLists = async () => {
-            const data = await getDbLists();
-            setRankLists(data);
-        };
-
-        if (session) {
-            console.log(session.user.id);
-            fetchLists();
+        if (session?.user?.id) {
+            getDbLists(session.user.id).then(data => setRankLists(data));
         }
     }, [session]);
 
