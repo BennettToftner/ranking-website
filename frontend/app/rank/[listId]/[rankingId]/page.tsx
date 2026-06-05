@@ -1,6 +1,6 @@
 'use client';
 
-import { Element, getListById, RankNode, newRankNode, getNextPair, sortNextPair, Ranking, getRankingById, saveRankingById } from "@/utils/utils";
+import { Element, getListById, RankNode, newRankNode, getNextPair, sortNextPair, RankingInfo } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
