@@ -25,9 +25,9 @@ export async function GET (
     try {
 
         const rankingQuery = `SELECT *
-                              FROM RANKING
+                              FROM ranking as r
                               WHERE id = $1
-                              AND (l.privacy = 'public' OR l.owner_id = $2)`;
+                              AND (r.privacy = 'public' OR r.owner_id = $2)`;
         const rankingValues = [rankingId, userId];
         const listRes = await pool.query<RankingInfo>(rankingQuery, rankingValues);
 
@@ -62,7 +62,7 @@ export async function POST (
     var listId = '';
     var name = 'Untitled Ranking';
     var privacy = "private";
-    var rankData = '{}'
+    let rankData: Record<string, any> = {};
 
     try {
         const body = await request.json();
@@ -70,7 +70,7 @@ export async function POST (
         listId = body.listId ?? listId;
         name = body.name ?? name;
         privacy = body.privacy ?? privacy;
-        rankData = body.rank_data ?? rankData;
+        rankData = body.rankNode ?? rankData;
 
     } catch (error) {
         return Response.json({ error: "Invalid JSON" }, { status: 400 });
@@ -82,8 +82,8 @@ export async function POST (
                               VALUES ($1, $2, $3, $4, $5, $6)
                               ON CONFLICT (id)
                               DO UPDATE SET
-                              name = EXCLUDED.name
-                              privacy = EXCLUDED.privacy
+                              name = EXCLUDED.name,
+                              privacy = EXCLUDED.privacy,
                               rank_data = EXCLUDED.rank_data
                               WHERE ranking.owner_id = $3`;
         const rankingValues = [rankingId, listId, userId, name, privacy, rankData];
@@ -93,9 +93,10 @@ export async function POST (
             return NextResponse.json({ error: "List not found" }, { status: 404 });
         }
 
-        return NextResponse.json(listRes.rows[0]);
+        return NextResponse.json({ success: true });
 
     } catch (error) {
+        console.log(`Database error: ${error}`);
         return NextResponse.json({ error: "Server Error" }, { status: 500 });
     }
 }

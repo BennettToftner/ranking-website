@@ -1,66 +1,83 @@
 'use client';
 
-import { Element, getListById, RankNode, newRankNode, getNextPair, sortNextPair, RankingInfo } from "@/utils/utils";
+import { Element, getDbList, RankNode, newRankNode, getNextPair, sortNextPair, RankingInfo, getDbRanking } from "@/utils/utils";
+import { authClient } from "@/utils/auth-client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
 
 export default function RankListPage() {
 
+  const { data: session } = authClient.useSession();
   const params = useParams();
   const router = useRouter();
 
-
+  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
   const [listNotFound, setListNotFound] = useState<boolean>(false);
   const [rankingFinished, setRankingFinished] = useState<boolean>(false);
 
-  const [ranking, setRanking] = useState<Ranking>({id: "0", name: "", rankNode: newRankNode([])});
-  const [currentPair, setCurrentPair] = useState<Element[]>([{index: 0, name: ""}, {index: 1, name: ""}]);
+  const [ranking, setRanking] = useState<RankingInfo>({id: "0", list_id: "", owner_id: "", name: "", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), rank_data: newRankNode([])});
+  const [currentPair, setCurrentPair] = useState<Element[]>([{id: "", name: ""}, {id: "", name: ""}]);
 
   useEffect(() => {
+
+    const userId = session?.user.id;
+
+    if (!userId) {
+      return;
+    }
+
     if (!params) { return; }
 
-    const listId = params.listId;
-    const rankingId = params.rankingId;
+    const listId = params.listId as string;
+    const rankingId = params.rankingId as string;
 
     if (rankingId && rankingId !== "0") {
-      const savedRanking = getRankingById(rankingId.toString());
-      if (savedRanking) {
-        setRanking(savedRanking);
-        return;
-      }
+      getDbRanking(rankingId).then(result => {
+        setPageLoaded(true);
+        if (result != "NOT_FOUND") {
+          setRanking(result);
+        }
+      });
+      return;
     }
+
+    //new ranking
 
     if (!listId) {
-        setListNotFound(true);
-        return;
+      setListNotFound(true);
+      setPageLoaded(true);
+      return;
     }
 
-    const elementList = getListById(listId.toString());
-    
-    if (elementList) {
-        setRanking({id: crypto.randomUUID(), name: "", rankNode: newRankNode(elementList.elements)});
-        setCurrentPair(getNextPair(ranking.rankNode))
-    } else {
+    getDbList(listId).then(result => {
+      if (result == "NOT_FOUND") {
         setListNotFound(true);
-        return;
-    }
-  }, [params.id]);
+      } else {
+        const elementList = result.elements;
+        const generatedNode = newRankNode(elementList);
+        setRanking({id: crypto.randomUUID(), list_id: listId, owner_id: userId, name: "", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), rank_data: generatedNode});
+        setCurrentPair(getNextPair(generatedNode));
+      }
+    });
+
+    setPageLoaded(true);
+  }, [params.id, session]);
 
   useEffect(() => {
-    if (ranking.rankNode.isSorted) {
+    if (ranking.rank_data.isSorted) {
         console.log("finished!");
         setRankingFinished(true);
     }
     else {
-        setCurrentPair(getNextPair(ranking.rankNode));
+        setCurrentPair(getNextPair(ranking.rank_data));
         setRankingFinished(false);
     }
   }, [ranking])
 
   function makeDecision(preferLeft: boolean) {
     setRanking(prevRanking => {
-      const newRankNode = sortNextPair(prevRanking.rankNode, preferLeft);
+      const newRankNode = sortNextPair(prevRanking.rank_data, preferLeft);
       if (!newRankNode) {
           return prevRanking;
       }
@@ -68,8 +85,20 @@ export default function RankListPage() {
     });
   }
 
-  function saveRanking() {
-    saveRankingById(ranking.id, ranking)
+  async function saveRanking() {
+      const response = await fetch(`/api/ranking/${ranking.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({listId: ranking.list_id, name: ranking.name, privacy: ranking.privacy, rankNode: ranking.rank_data})
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
   }
 
   return (
@@ -85,11 +114,11 @@ export default function RankListPage() {
           <br></br>
           <button onClick={() => makeDecision(false)}>{currentPair[1].name}</button>
           <br></br>
-          <button onClick={saveRanking}>Click me to save ranking locally</button>
+          <button onClick={saveRanking}>Click me to save ranking to database</button>
         </div>}
       {rankingFinished &&
         <div>
-          {ranking.rankNode.sortedList.map((item, index) => (
+          {ranking.rank_data.sortedList.map((item, index) => (
             <li key={index}>
                 {item.name}
             </li>

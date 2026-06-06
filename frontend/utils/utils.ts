@@ -19,6 +19,31 @@ export interface Element {
   name: string;
 }
 
+type ListFetchResult = ListInfo | "NOT_FOUND";
+
+export async function getDbList(listId: string): Promise<ListFetchResult> {
+  try {
+    const response = await fetch(`/api/list/${listId}`, {
+        method: 'GET',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        console.error("Failed to fetch lists");
+        return "NOT_FOUND";
+    }
+
+    const data = await response.json() as ListInfo;
+    
+    return data;
+  } catch(error) {
+      console.error("Error fetching lists:", error);
+      return "NOT_FOUND";
+  }
+}
+
 function getListMap(): Map<string, ListInfo> {
   const data = localStorage.getItem('savedLists');
   if (!data) {
@@ -197,5 +222,30 @@ export interface RankingInfo {
   privacy: 'public' | 'private';
   created_at: Date;
   updated_at: Date;
-  rankNode: RankNode;
+  rank_data: RankNode;
+}
+
+type RankingFetchResult = RankingInfo | "NOT_FOUND";
+
+export async function getDbRanking(rankingId: string): Promise<RankingFetchResult> {
+  try {
+    const response = await fetch(`/api/ranking/${rankingId}`, {
+        method: 'GET',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        console.error("Failed to fetch lists");
+        return "NOT_FOUND";
+    }
+
+    const data = await response.json() as RankingInfo;
+
+    return data;
+  } catch(error) {
+    console.error("Error fetching lists:", error);
+    return "NOT_FOUND";
+  }
 }

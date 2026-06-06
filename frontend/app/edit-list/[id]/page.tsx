@@ -1,6 +1,6 @@
 'use client';
 
-import { Element, ListInfo } from "@/utils/utils";
+import { Element, ListInfo, getDbList } from "@/utils/utils";
 import { authClient } from "@/utils/auth-client"
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -15,31 +15,6 @@ export default function EditListPage() {
   const [pageLoaded, setPageLoaded] = useState<boolean>(false);
   const [listFound, setListFound] = useState<boolean>(false);
   const [savedList, setSavedList] = useState<ListInfo>({id: "0", name: "", owner_id: "0", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: []});
-
-  type FetchResult = ListInfo | "NOT_FOUND";
-
-  async function getDbList(listId: string): Promise<FetchResult> {
-    try {
-      const response = await fetch(`/api/list/${listId}`, {
-          method: 'GET',
-          headers: {
-          'Content-Type': 'application/json',
-          },
-      });
-
-      if (!response.ok) {
-          console.error("Failed to fetch lists");
-          return "NOT_FOUND";
-      }
-
-      const data = await response.json() as ListInfo;
-      
-      return data;
-    } catch(error) {
-        console.error("Error fetching lists:", error);
-        return "NOT_FOUND";
-    }
-  }
 
   useEffect(() => {
     if (!params) { return; }
