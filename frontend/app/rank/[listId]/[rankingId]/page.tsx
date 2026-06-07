@@ -81,7 +81,7 @@ export default function RankListPage() {
       if (!newRankNode) {
           return prevRanking;
       }
-      return {...prevRanking, rankNode: newRankNode};
+      return {...prevRanking, rank_data: newRankNode};
     });
   }
 
