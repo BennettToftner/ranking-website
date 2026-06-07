@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { authClient } from "@/utils/auth-client";
 import { NextResponse } from "next/server";
 import { pool } from "@/utils/database";
-import { ListInfo } from "@/utils/utils";
+import { ListInfo, RankingInfo } from "@/utils/utils";
 
 export async function GET(
   request: Request,
@@ -21,14 +21,14 @@ export async function GET(
   }
 
   const userId = session.data?.user.id;
-  var text = `SELECT * FROM list WHERE owner_id = $1 AND privacy = 'public'`
+  var text = `SELECT * FROM ranking WHERE owner_id = $1 AND privacy = 'public'`
   if (userId == requestedUserId) {
-    text = `SELECT * FROM list WHERE owner_id = $1`
+    text = `SELECT * FROM ranking WHERE owner_id = $1`
   }
 
   try {
     const values = [requestedUserId];
-    const res = await pool.query<ListInfo>(text, values);
+    const res = await pool.query<RankingInfo>(text, values);
 
     if (res.rowCount == null || res.rowCount == 0) {
         return NextResponse.json([]);
