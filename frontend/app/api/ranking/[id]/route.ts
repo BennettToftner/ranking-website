@@ -100,3 +100,40 @@ export async function POST (
         return NextResponse.json({ error: "Server Error" }, { status: 500 });
     }
 }
+
+export async function DELETE (
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: listId } = await params;
+
+  console.log(`ranking id is ${listId}`)
+
+  const session = await authClient.getSession({
+    fetchOptions: {
+      headers: await headers() 
+    }
+  });
+
+  if (!session.data) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+
+    const deleteListQuery = `DELETE FROM ranking
+                             WHERE owner_id = $1
+                             AND id = $2`;
+    const deleteListValues = [session.data?.user.id, listId];
+    const insertListRes = await pool.query(deleteListQuery, deleteListValues);
+
+    if (insertListRes.rowCount == 0) {
+      return NextResponse.json({ status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error(`Database error: ${error.message}`);
+    return NextResponse.json({ error: "Database Error:" }, { status: 500 });
+  }
+}
