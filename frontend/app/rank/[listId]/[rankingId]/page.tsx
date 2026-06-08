@@ -56,9 +56,9 @@ export default function RankListPage() {
       if (result == "NOT_FOUND") {
         setListNotFound(true);
       } else {
-        const elementList = result.elements;
-        const generatedNode = newRankNode(elementList);
-        setRanking({id: crypto.randomUUID(), list_id: listId, owner_id: userId, name: "", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), rank_data: generatedNode});
+        const listToRank = result;
+        const generatedNode = newRankNode(listToRank.elements);
+        setRanking({id: crypto.randomUUID(), list_id: listId, owner_id: userId, name: `Ranking of ${listToRank.name}`, privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), rank_data: generatedNode});
         setCurrentPair(getNextPair(generatedNode));
       }
     });

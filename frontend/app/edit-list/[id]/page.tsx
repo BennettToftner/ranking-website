@@ -27,7 +27,7 @@ export default function EditListPage() {
     const listId = params.id as string;
 
     if (!listId || listId === "0") {
-      setSavedList({ id: crypto.randomUUID(), name: "", owner_id: userId, privacy: "private",  created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: [] });
+      setSavedList({ id: crypto.randomUUID(), name: "Unitled List", owner_id: userId, privacy: "private",  created_at: new Date(Date.now()), updated_at: new Date(Date.now()), elements: [] });
       setListFound(true);
       setPageLoaded(true);
       return;
