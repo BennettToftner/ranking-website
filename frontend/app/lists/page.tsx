@@ -16,7 +16,7 @@ export default function ListsPage() {
 
     async function getDbLists(userId: string): Promise<ListInfo[]> {
         try {
-            const response = await fetch(`/api/list/user/${userId}`, {
+            const response = await fetch(`/api/users/${userId}/lists`, {
                 method: 'GET',
                 headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default function ListsPage() {
 
     async function deleteListDb(listId: string): Promise<boolean> {
         try {
-            const response = await fetch(`/api/list/${listId}`, {
+            const response = await fetch(`/api/lists/${listId}`, {
                 method: 'DELETE',
                 headers: {
                 'Content-Type': 'application/json',

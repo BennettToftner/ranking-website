@@ -45,7 +45,7 @@ export default function RankingsPage() {
 
     async function deleteRankingDb(listId: string): Promise<boolean> {
         try {
-            const response = await fetch(`/api/ranking/${listId}`, {
+            const response = await fetch(`/api/rankings/${listId}`, {
                 method: 'DELETE',
                 headers: {
                 'Content-Type': 'application/json',

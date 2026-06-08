@@ -43,7 +43,7 @@ export default function EditListPage() {
   }, [params.id, session]);
 
   async function saveListDb() {
-    const response = await fetch(`/api/list/${savedList.id}`, {
+    const response = await fetch(`/api/lists/${savedList.id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

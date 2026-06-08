@@ -23,7 +23,7 @@ type ListFetchResult = ListInfo | "NOT_FOUND";
 
 export async function getDbList(listId: string): Promise<ListFetchResult> {
   try {
-    const response = await fetch(`/api/list/${listId}`, {
+    const response = await fetch(`/api/lists/${listId}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
@@ -229,7 +229,7 @@ type RankingFetchResult = RankingInfo | "NOT_FOUND";
 
 export async function getDbRanking(rankingId: string): Promise<RankingFetchResult> {
   try {
-    const response = await fetch(`/api/ranking/${rankingId}`, {
+    const response = await fetch(`/api/rankings/${rankingId}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',

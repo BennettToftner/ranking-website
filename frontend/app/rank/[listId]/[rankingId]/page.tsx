@@ -96,7 +96,7 @@ export default function RankListPage() {
   async function saveRanking() {
     if (!ranking) {return;}
 
-    const response = await fetch(`/api/ranking/${ranking.id}`, {
+    const response = await fetch(`/api/rankings/${ranking.id}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
