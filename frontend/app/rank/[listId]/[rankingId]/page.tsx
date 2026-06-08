@@ -16,10 +16,12 @@ export default function RankListPage() {
   const [listNotFound, setListNotFound] = useState<boolean>(false);
   const [rankingFinished, setRankingFinished] = useState<boolean>(false);
 
-  const [ranking, setRanking] = useState<RankingInfo>({id: "0", list_id: "", owner_id: "", name: "", privacy: "private", created_at: new Date(Date.now()), updated_at: new Date(Date.now()), rank_data: newRankNode([])});
+  const [ranking, setRanking] = useState<RankingInfo | null>(null);
   const [currentPair, setCurrentPair] = useState<Element[]>([{id: "", name: ""}, {id: "", name: ""}]);
 
   useEffect(() => {
+
+    if (ranking) { return; }
 
     const userId = session?.user.id;
 
@@ -65,6 +67,9 @@ export default function RankListPage() {
   }, [params.id, session]);
 
   useEffect(() => {
+    if (!ranking) {
+      return;
+    }
     if (ranking.rank_data.isSorted) {
         console.log("finished!");
         setRankingFinished(true);
@@ -77,6 +82,9 @@ export default function RankListPage() {
 
   function makeDecision(preferLeft: boolean) {
     setRanking(prevRanking => {
+      if (!prevRanking) {
+        return null;
+      }
       const newRankNode = sortNextPair(prevRanking.rank_data, preferLeft);
       if (!newRankNode) {
           return prevRanking;
@@ -86,12 +94,14 @@ export default function RankListPage() {
   }
 
   async function saveRanking() {
-      const response = await fetch(`/api/ranking/${ranking.id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({listId: ranking.list_id, name: ranking.name, privacy: ranking.privacy, rankNode: ranking.rank_data})
+    if (!ranking) {return;}
+
+    const response = await fetch(`/api/ranking/${ranking.id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({listId: ranking.list_id, name: ranking.name, privacy: ranking.privacy, rankNode: ranking.rank_data})
     });
 
     if (!response.ok) {
@@ -101,29 +111,35 @@ export default function RankListPage() {
     const data = await response.json();
   }
 
-  return (
+  if (!ranking) {
     <div>
       <Navbar></Navbar>
-      {listNotFound &&
-        <div>
-          <h1 className="text-red-500 text-xl">Couldn't find a list with that ID.</h1>
-        </div>}
-      {!listNotFound && !rankingFinished &&
-        <div>
-          <button onClick={() => makeDecision(true)}>{currentPair[0].name}</button>
-          <br></br>
-          <button onClick={() => makeDecision(false)}>{currentPair[1].name}</button>
-          <br></br>
-          <button onClick={saveRanking}>Click me to save ranking to database</button>
-        </div>}
-      {rankingFinished &&
-        <div>
-          {ranking.rank_data.sortedList.map((item, index) => (
-            <li key={index}>
-                {item.name}
-            </li>
-          ))}
-        </div>}
     </div>
-  );
+  } else {
+    return (
+      <div>
+        <Navbar></Navbar>
+        {listNotFound &&
+          <div>
+            <h1 className="text-red-500 text-xl">Couldn't find a list with that ID.</h1>
+          </div>}
+        {!listNotFound && !rankingFinished &&
+          <div>
+            <button onClick={() => makeDecision(true)}>{currentPair[0].name}</button>
+            <br></br>
+            <button onClick={() => makeDecision(false)}>{currentPair[1].name}</button>
+            <br></br>
+            <button onClick={saveRanking}>Click me to save ranking to database</button>
+          </div>}
+        {rankingFinished &&
+          <div>
+            {ranking.rank_data.sortedList.map((item, index) => (
+              <li key={index}>
+                  {item.name}
+              </li>
+            ))}
+          </div>}
+      </div>
+    );
+  }
 }
