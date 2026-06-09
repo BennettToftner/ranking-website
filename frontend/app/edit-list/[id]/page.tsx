@@ -5,6 +5,7 @@ import { authClient } from "@/utils/auth-client"
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
+import ListSidebar from "./list-sidebar";
 
 export default function EditListPage() {
 
@@ -48,7 +49,7 @@ export default function EditListPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({name: savedList.name, elements: savedList.elements})
+      body: JSON.stringify({name: savedList.name, privacy: savedList.privacy, elements: savedList.elements})
     });
 
     if (!response.ok) {
@@ -61,6 +62,11 @@ export default function EditListPage() {
 
   function setListName(newName: string) {
     setSavedList(prevList => ({...prevList, name: newName}));
+  }
+
+  function setListPrivacy(isPrivate: boolean) {
+    const newPrivacy: 'public' | 'private' = isPrivate? 'private' : 'public';
+    setSavedList(prevList => ({...prevList, privacy: newPrivacy}));
   }
 
   function addItem() {
@@ -99,6 +105,7 @@ export default function EditListPage() {
     return (
       <div>
         <Navbar></Navbar>
+        <ListSidebar initialName={savedList.name} initialPrivacy={savedList.privacy} onNameChange={setListName} onPrivacyChange={setListPrivacy} onSave={saveListDb}></ListSidebar>
         <input type="text" value={savedList.name} placeholder="List name" onChange={(e) => setListName(e.target.value)}/>
         <ul>
           {savedList.elements.map((item, index) => (
@@ -114,8 +121,6 @@ export default function EditListPage() {
           ))}
         </ul>
         <button onClick={addItem}>Click me to add new item</button>
-        <br></br>
-        <button onClick={saveListDb}>Click me to save to database</button>
       </div>
     );
   }
