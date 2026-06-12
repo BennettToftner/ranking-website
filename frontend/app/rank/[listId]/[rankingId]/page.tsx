@@ -5,6 +5,7 @@ import { authClient } from "@/utils/auth-client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
+import RankSidebar from "./rank-sidebar";
 
 export default function RankListPage() {
 
@@ -111,6 +112,21 @@ export default function RankListPage() {
     const data = await response.json();
   }
 
+  function setRankingName(newName: string) {
+    setRanking(prevRanking => {
+      if (prevRanking === null) return null;
+      return { ...prevRanking, name: newName };
+    });
+  }
+
+  function setRankingPrivacy(isPrivate: boolean) {
+    const newPrivacy: 'public' | 'private' = isPrivate? 'private' : 'public';
+    setRanking(prevRanking => {
+      if (prevRanking === null) return null;
+      return { ...prevRanking, privacy: newPrivacy };
+    });
+  }
+
   if (!ranking) {
     <div>
       <Navbar></Navbar>
@@ -119,6 +135,7 @@ export default function RankListPage() {
     return (
       <div>
         <Navbar></Navbar>
+        <RankSidebar initialName={ranking.name} initialPrivacy={ranking.privacy} onNameChange={setRankingName} onPrivacyChange={setRankingPrivacy} onSave={saveRanking}></RankSidebar>
         {listNotFound &&
           <div>
             <h1 className="text-red-500 text-xl">Couldn't find a list with that ID.</h1>
@@ -128,8 +145,6 @@ export default function RankListPage() {
             <button onClick={() => makeDecision(true)}>{currentPair[0].name}</button>
             <br></br>
             <button onClick={() => makeDecision(false)}>{currentPair[1].name}</button>
-            <br></br>
-            <button onClick={saveRanking}>Click me to save ranking to database</button>
           </div>}
         {rankingFinished &&
           <div>
